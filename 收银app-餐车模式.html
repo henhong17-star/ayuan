@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>餐车菜品验收与剩餐记录原型</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fa-solid fa-bowl-rice"></i>
+                <span>悠饭</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item">
+                    <div class="icon-box"><i class="fa-solid fa-utensils"></i></div>
+                    <span>点餐</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <div class="icon-box"><i class="fa-solid fa-bullhorn"></i></div>
+                    <span>叫号</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <div class="icon-box"><i class="fa-solid fa-cash-register"></i></div>
+                    <span>收银</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <div class="icon-box"><i class="fa-solid fa-weight-scale"></i></div>
+                    <span>称重</span>
+                </a>
+                <a href="#" class="nav-item active">
+                    <div class="icon-box"><i class="fa-solid fa-truck-fast"></i></div>
+                    <span>餐车</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <div class="icon-box"><i class="fa-solid fa-list-check"></i></div>
+                    <span>订单</span>
+                </a>
+                <a href="验收与剩餐记录.html" class="nav-item">
+                    <div class="icon-box"><i class="fa-solid fa-chart-line"></i></div>
+                    <span>报表</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- 主界面内容 -->
+        <div class="main-wrapper">
+            <!-- 顶部头信息 -->
+            <header class="top-header">
+                <div class="header-info">
+                    <span><i class="fa-solid fa-shop"></i> SP000001</span>
+                    <span><i class="fa-solid fa-house"></i> 悠饭第一食堂</span>
+                    <span><i class="fa-solid fa-store"></i> 隔壁老王家</span>
+                </div>
+                <!-- 头部不再放 Tab -->
+                <div class="header-time">
+                    <i class="fa-regular fa-clock"></i> <span id="current-time">12:00-14:00</span>
+                    <span class="badge-lunch">午餐</span>
+                </div>
+            </header>
+
+            <!-- 业务操作区域 -->
+            <main class="content-area">
+                <!-- 模式切换移回内容区顶部 -->
+                <div class="content-header">
+                    <div class="mode-switcher">
+                        <button id="btn-mode-acceptance" class="mode-btn active" onclick="switchMode('acceptance')">
+                            菜品验收
+                        </button>
+                        <button id="btn-mode-leftover" class="mode-btn" onclick="switchMode('leftover')">
+                            剩餐记录
+                        </button>
+                    </div>
+                    <!-- 去皮按钮 -->
+                    <button class="btn-icon-text" onclick="showTareModal()" style="margin-left: auto;">
+                        <i class="fa-solid fa-scale-unbalanced"></i> 设置去皮
+                    </button>
+                </div>
+
+                <!-- 三栏布局工作区 -->
+                <div class="three-column-layout">
+                    <!-- 第一栏：菜品列表 -->
+                    <section class="col-dish">
+                        <div class="panel-header">
+                            <h4>可选菜品</h4>
+                        </div>
+                        <div id="dish-grid" class="dish-list-vertical">
+                            <!-- JS填充 -->
+                        </div>
+                    </section>
+
+                    <!-- 第二栏：称重预览 -->
+                    <section class="col-preview">
+                        <!-- 摄像头区域 -->
+                        <div class="camera-square-wrapper">
+                            <div class="camera-container">
+                                <video id="camera-feed" autoplay playsinline class="hidden"></video>
+                                <div id="camera-placeholder" class="camera-placeholder">
+                                    <i class="fa-solid fa-camera"></i>
+                                    <p id="camera-msg">请先选择左侧菜品</p>
+                                </div>
+                                <div id="flash-overlay" class="flash-overlay"></div>
+                            </div>
+                        </div>
+
+                        <!-- 操作控制区 -->
+                        <div class="control-area">
+                            <div class="selected-info-bar">
+                                <h2 id="selected-dish-name">请选择左侧菜品</h2>
+                                <span id="selected-dish-status" class="status-tag">等待操作</span>
+                            </div>
+
+                            <div class="weight-control-row">
+                                <div class="weight-display-large">
+                                    <span id="weight-value">0</span>
+                                    <span class="unit">g</span>
+                                    <span id="tare-info"
+                                        style="font-size: 0.8rem; color: #64748b; font-weight: normal; margin-left: 0.5rem; display:none;">(已去皮)</span>
+                                </div>
+                            </div>
+
+                            <div class="action-buttons-row">
+                                <button id="btn-primary-action" class="btn-primary btn-xl"
+                                    onclick="handlePrimaryAction()" disabled>
+                                    <i class="fa-solid fa-check"></i> 确认记录
+                                </button>
+                                <button id="btn-secondary-action" class="btn-danger btn-xl hidden"
+                                    onclick="handleSoldOut()">
+                                    <i class="fa-solid fa-store-slash"></i> 标记售罄
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 第三栏：操作记录 -->
+                    <section class="col-log">
+                        <div class="panel-header">
+                            <h4><i class="fa-solid fa-list"></i> <span id="log-title">操作记录</span></h4>
+                        </div>
+                        <div class="log-list-container">
+                            <div id="log-list" class="log-items">
+                                <!-- JS填充 -->
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 去皮设置弹窗 -->
+    <div id="tare-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="modal-title">设置去皮</h3>
+            <!-- 移除份数设置，默认1份 -->
+            <div class="form-group">
+                <label>份数盆重量 (g)</label>
+                <input type="number" id="tare-unit-weight" value="150" step="1" class="input-field"
+                    style="font-size: 1.5rem; text-align: center;">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeTareModal()">取消</button>
+                <button class="btn-primary" onclick="confirmTare()">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden">操作成功</div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

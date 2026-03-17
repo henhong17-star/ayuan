@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片功能测试</title>
+</head>
+
+<body>
+    <h1>测试图片捕获和显示</h1>
+    <button onclick="testCapture()">测试捕获图片</button>
+    <button onclick="testDisplay()">测试显示记录</button>
+    <div id="output"></div>
+
+    <script>
+        // 模拟 localStorage 中的记录数据
+        function testCapture() {
+            const testRecord = {
+                id: '123',
+                type: 'acceptance',
+                time: '14:30:25',
+                name: '招牌红烧肉',
+                detail: '2500 g',
+                image: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAyADIDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlbaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigAooooAKKKKACiiigAooooAKKKKACiiigD//2Q=='
+            };
+
+            console.log('测试记录:', testRecord);
+            document.getElementById('output').innerHTML = `
+                <h3>记录详情：</h3>
+                <p>菜品：${testRecord.name}</p>
+                <p>重量：${testRecord.detail}</p>
+                <p>时间：${testRecord.time}</p>
+                <p>图片：${testRecord.image ? '有' : '无'}</p>
+                ${testRecord.image ? `<img src="${testRecord.image}" style="width: 100px; height: 100px; border: 1px solid #ccc;">` : ''}
+            `;
+        }
+
+        function testDisplay() {
+            // 检查 localStorage
+            const records = JSON.parse(localStorage.getItem('food_truck_records') || '[]');
+            console.log('localStorage 中的记录数:', records.length);
+            console.log('记录详情:', records);
+
+            if (records.length === 0) {
+                document.getElementById('output').innerHTML = '<p>localStorage 中没有记录</p>';
+                return;
+            }
+
+            const html = records.map(rec => `
+                <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                    <p><strong>${rec.name}</strong> - ${rec.detail}</p>
+                    <p>时间: ${rec.time}</p>
+                    <p>类型: ${rec.type}</p>
+                    <p>图片: ${rec.image ? '✓ 有' : '✗ 无'}</p>
+                    ${rec.image ? `<img src="${rec.image}" style="width: 80px; height: 80px; object-fit: cover; border: 1px solid #ddd;">` : ''}
+                </div>
+            `).join('');
+
+            document.getElementById('output').innerHTML = html;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,732 @@
+/* 全局重置与基础样式 */
+:root {
+    --primary-color: #f97316;
+    /* 橙色 - 参考图 */
+    --primary-hover: #ea580c;
+    --secondary-color: #64748b;
+    --bg-dark: #f8fafc;
+    --surface-white: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+
+    /* 触摸优化：更大的点击区域与间距 */
+    --touch-target-size: 48px;
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+
+    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family);
+    background-color: var(--bg-dark);
+    height: 100vh;
+    overflow: hidden;
+    /* 禁止缩放与双击放大 */
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* 布局容器 */
+.app-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* 侧边栏 */
+.sidebar {
+    width: 80px;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0;
+    z-index: 10;
+}
+
+.sidebar-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+}
+
+.sidebar-logo i {
+    font-size: 1.5rem;
+}
+
+.nav-menu {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    position: relative;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.nav-item i {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+@media (max-width: 1024px) {
+    .three-column-layout {
+        /* Optimize for smaller landscape screens */
+        grid-template-columns: 180px 1fr 240px;
+        gap: 0.5rem;
+    }
+
+    .col-dish,
+    .col-preview,
+    .col-log {
+        padding: 0.8rem;
+    }
+
+    .dish-card {
+        font-size: 1rem;
+        padding: 1rem 0.5rem;
+    }
+}
+
+.nav-item:active,
+.nav-item.active {
+    color: var(--primary-color);
+    background: #fff7ed;
+}
+
+.nav-item.active {
+    border-right: 3px solid var(--primary-color);
+}
+
+/* 主界面 */
+.main-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.top-header {
+    background: white;
+    height: 60px;
+    padding: 0 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
+.header-info {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 1.5rem;
+}
+
+.header-time {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.badge-lunch {
+    background: #fef3c7;
+    color: #d97706;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+/* 模式切换 (左上角, 内容区内) */
+.content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    overflow: hidden;
+    gap: 1rem;
+}
+
+.content-header {
+    display: flex;
+    justify-content: flex-start;
+    flex-shrink: 0;
+}
+
+.mode-switcher {
+    display: inline-flex;
+    background: #cbd5e1;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.mode-btn {
+    border: none;
+    background: transparent;
+    padding: 0.8rem 2rem;
+    /* 更大的点击区域 */
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #475569;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.mode-btn.active {
+    background: white;
+    color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
+    font-weight: 700;
+}
+
+/* 三栏布局核心 */
+.three-column-layout {
+    flex: 1;
+    display: grid;
+    /* 左侧菜品(220px) | 中间预览(1fr) | 右侧日志(320px) */
+    grid-template-columns: 240px 1fr 320px;
+    gap: 1rem;
+    overflow: hidden;
+    background: #f1f5f9;
+}
+
+/* 第一栏：菜品 */
+.col-dish {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    overflow: hidden;
+}
+
+.panel-header {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.dish-list-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+/* 菜品卡片 - 触控优化 */
+.dish-card {
+    padding: 1.2rem 1rem;
+    /* 增加高度 */
+    background: #f8fafc;
+    /* 浅灰背景 */
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.dish-card:active {
+    transform: scale(0.98);
+}
+
+.dish-card.selected {
+    background: #fff7ed;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.dish-card.disabled {
+    opacity: 0.6;
+    background: #e2e8f0;
+    color: #64748b;
+    cursor: not-allowed;
+    position: relative;
+}
+
+/* 简化提示文字 */
+.dish-card.disabled::after {
+    content: '已记录';
+    display: block;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    color: #10b981;
+    font-weight: normal;
+}
+
+/* 分类标题 */
+.category-header {
+    padding: 0.8rem 0.5rem 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 0.5rem;
+}
+
+.category-header:not(:first-child) {
+    margin-top: 1rem;
+}
+
+/* 第二栏：预览与操作 */
+.col-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-y: auto;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.camera-square-wrapper {
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 1/1;
+    border-radius: 12px;
+    overflow: hidden;
+    background: black;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    flex-shrink: 0;
+}
+
+.camera-container,
+#camera-feed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: none;
+}
+
+.camera-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #1e293b;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.camera-placeholder i {
+    font-size: 4rem;
+    opacity: 0.5;
+    margin-bottom: 1rem;
+}
+
+.flash-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    opacity: 0;
+    transition: opacity 0.1s;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.control-area {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.selected-info-bar {
+    text-align: center;
+}
+
+#selected-dish-name {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.status-tag {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    background: #f1f5f9;
+    padding: 0.2rem 0.8rem;
+    border-radius: 99px;
+}
+
+.status-tag.active {
+    color: var(--primary-color);
+    background: #fff7ed;
+}
+
+/* 重量显示与重称按钮 */
+.weight-control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    padding: 1.2rem;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+}
+
+.weight-display-large {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.unit {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-left: 0.25rem;
+    font-weight: 500;
+}
+
+.btn-icon-text {
+    border: 2px solid #cbd5e1;
+    background: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-icon-text:active {
+    background: #f1f5f9;
+    transform: scale(0.98);
+}
+
+/* 主操作按钮组 - 大尺寸适配触控 */
+.action-buttons-row {
+    display: flex;
+    gap: 1rem;
+    flex-direction: column;
+}
+
+.btn-xl {
+    width: 100%;
+    padding: 1.2rem;
+    font-size: 1.3rem;
+    border-radius: 12px;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.btn-xl:active {
+    transform: scale(0.98);
+    box-shadow: none;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--primary-hover);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+/* 第三栏：日志 */
+.col-log {
+    background: white;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.log-list-container {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.log-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.log-item {
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.log-item-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.log-item-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.log-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.log-value {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+/* 红色删除按钮 - 易点 */
+.btn-delete-sm {
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+}
+
+.btn-delete-sm:active {
+    background: #fee2e2;
+}
+
+/* 工具类 */
+.hidden {
+    display: none !important;
+}
+
+.toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* 居中显示 */
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 1.5rem 2.5rem;
+    border-radius: 12px;
+    z-index: 1000;
+    animation: fadeIn 0.2s;
+    font-size: 1.2rem;
+    width: max-content;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -40%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* 响应式调整 */
+@media (max-width: 1024px) {
+    .three-column-layout {
+        /* 平板竖屏或小屏时，把日志放到下方，但这需要HTML结构调整。
+           鉴于收银机通常横屏，我们优化列宽比例 */
+        grid-template-columns: 180px 1fr 240px;
+        gap: 0.5rem;
+    }
+
+    .col-dish,
+    .col-preview,
+    .col-log {
+        padding: 0.8rem;
+    }
+
+    .dish-card {
+        font-size: 1rem;
+        padding: 1rem 0.5rem;
+    }
+}
+
+/* 模态框 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay:not(.hidden) {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 320px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.input-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.25rem;
+}
+
+.input-control button {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: #f1f5f9;
+    border-radius: 6px;
+    font-size: 1.25rem;
+    color: #1e293b;
+    cursor: pointer;
+}
+
+.input-control input {
+    flex: 1;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    border: none;
+    outline: none;
+    background: transparent;
+}
+
+.input-field {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: stretch;
+    margin-top: 0.5rem;
+}
+
+.modal-actions button {
+    flex: 1;
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #475569;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+}

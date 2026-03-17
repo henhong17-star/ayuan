@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<!--
+    页面名称: 欢迎主页 (Welcome Homepage)
+    功能描述: 作为餐车管理系统的统一入口，提供导航到不同子模块的功能。
+    涉及技能: 
+      - welcome-homepage: 高质感欢迎页，动态流云背景，玻璃拟物化卡片，微互动动画
+      - frontend-design: 极具识别度的现代排版，鲜明的色彩对比
+      - code-comments: 清晰的代码结构注释
+-->
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>悠饭移动餐车系统</title>
+    <!-- 引入高质感字体: Outfit 用于标题, Inter 用于正文 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ==========================================================================
+           模块: 全局变量与复位
+           ========================================================================== */
+        :root {
+            /* 品牌核心色系：大胆的橙色为主色调，搭配高对比黑色与纯净白色 */
+            --color-primary: #FF5A00;
+            --color-primary-glow: rgba(255, 90, 0, 0.4);
+            --color-secondary: #00E5FF;
+            --color-secondary-glow: rgba(0, 229, 255, 0.4);
+            
+            --color-bg-light: #F4F7F6;
+            --color-text-dark: #0D0E15;
+            --color-text-muted: #6B7280;
+            
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-shadow: 0 24px 40px rgba(13, 14, 21, 0.08);
+            
+            --font-display: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: var(--font-body);
+            background-color: var(--color-bg-light);
+            overflow: hidden; /* 防止背景滚动 */
+            color: var(--color-text-dark);
+        }
+
+        /* ==========================================================================
+           模块: 动态背景 (Dynamic Background)
+           作用: 使用CSS动画和高斯模糊营造空间感与流动感
+           ========================================================================== */
+        .ambient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background: linear-gradient(145deg, #f0f4f8 0%, #e1e9f0 100%);
+        }
+
+        /* 流云模糊形体 */
+        .color-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.7;
+            animation: drift 20s infinite alternate ease-in-out;
+        }
+
+        .orb-1 {
+            background-color: var(--color-primary);
+            width: 60vw;
+            height: 60vw;
+            top: -20vh;
+            left: -10vw;
+            animation-duration: 25s;
+        }
+
+        .orb-2 {
+            background-color: var(--color-secondary);
+            width: 50vw;
+            height: 50vw;
+            bottom: -10vh;
+            right: -10vw;
+            animation-delay: -5s;
+        }
+        
+        .orb-3 {
+            background-color: #A78BFA;
+            width: 40vw;
+            height: 40vw;
+            top: 40vh;
+            left: 30vw;
+            animation-duration: 30s;
+            opacity: 0.5;
+        }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(5vw, 10vh) scale(1.1); }
+            66% { transform: translate(-10vw, 5vh) scale(0.9); }
+            100% { transform: translate(0vw, -5vh) scale(1.05); }
+        }
+
+        /* 噪点纹理叠加，增强质感 */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* ==========================================================================
+           模块: 主要内容区布局 (Main Content Layout)
+           ========================================================================== */
+        .layout-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 2rem;
+            animation: fadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 标题容器 */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 5rem;
+            position: relative;
+        }
+
+        .hero-icon {
+            font-size: 4rem;
+            color: var(--color-primary);
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 10px 20px var(--color-primary-glow));
+            display: inline-block;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            color: var(--color-text-dark);
+            line-height: 1.1;
+        }
+
+        /* ==========================================================================
+           模块: 导航卡片组 (Navigation Cards)
+           特性: 玻璃态容器，微交互动画
+           ========================================================================== */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2.5rem;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .nav-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        .nav-card {
+            position: relative;
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: var(--glass-shadow);
+            overflow: hidden;
+            group: card;
+        }
+
+        /* 卡片光晕悬停层 */
+        .nav-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 50% 120%, var(--accent-light) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 0;
+        }
+
+        /* 针对不同卡片设置特殊主色变量 */
+        .card-cashier {
+            --accent-color: var(--color-primary);
+            --accent-light: rgba(255, 90, 0, 0.15);
+        }
+
+        .card-admin {
+            --accent-color: #10B981; /* 翡翠绿 */
+            --accent-light: rgba(16, 185, 129, 0.15);
+        }
+
+        .nav-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 32px 60px rgba(0, 0, 0, 0.12),
+                        0 0 0 2px var(--glass-border) inset;
+        }
+
+        .nav-card:hover::after {
+            opacity: 1;
+        }
+
+        /* 确保内容在光晕之上 */
+        .card-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .card-icon {
+            font-size: 3.5rem;
+            color: var(--color-text-dark);
+            margin-bottom: 2rem;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
+        }
+
+        .nav-card:hover .card-icon {
+            transform: scale(1.1) rotate(-5deg);
+            color: var(--accent-color);
+        }
+
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--color-text-dark);
+            margin-bottom: 2rem;
+        }
+
+        /* 进入按钮样式 */
+        .btn-enter {
+            background-color: #FFFFFF;
+            color: var(--color-text-dark);
+            padding: 1rem 2rem;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .nav-card:hover .btn-enter {
+            background-color: var(--accent-color);
+            color: #FFFFFF;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--accent-light);
+            border-color: transparent;
+        }
+
+        .btn-enter i {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-card:hover .btn-enter i {
+            transform: translateX(6px);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 动态背景 -->
+    <div class="ambient-bg">
+        <div class="color-orb orb-1"></div>
+        <div class="color-orb orb-2"></div>
+        <div class="color-orb orb-3"></div>
+    </div>
+    
+    <!-- 噪点纹理叠加 -->
+    <div class="noise-overlay"></div>
+
+    <!-- 顶层交互容器 -->
+    <main class="layout-wrapper">
+        
+        <!-- 页面主标题 -->
+        <section class="hero-section">
+            <div class="hero-icon">
+                <i class="fa-solid fa-truck-fast"></i>
+            </div>
+            <h1 class="hero-title">移动餐车系统</h1>
+        </section>
+
+        <!-- 导航卡片区 -->
+        <nav class="nav-grid">
+            
+            <!-- 卡片1: 餐车收银端 -->
+            <a href="收银app-餐车模式.html" class="nav-card card-cashier">
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fa-solid fa-cash-register"></i>
+                    </div>
+                    <h2 class="card-title">餐车收银端</h2>
+                    <div class="btn-enter">
+                        点击进入 <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 卡片2: 验收与试餐后台 -->
+            <a href="验收与剩餐记录.html" class="nav-card card-admin">
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                    </div>
+                    <h2 class="card-title">验收与试餐后台</h2>
+                    <div class="btn-enter">
+                        点击进入 <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+            </a>
+
+        </nav>
+    </main>
+</body>
+
+</html>

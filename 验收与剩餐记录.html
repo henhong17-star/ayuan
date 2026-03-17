@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>餐车管理后台 - 验收与剩餐</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 后台专属样式覆盖 */
+        body {
+            background: #f0f2f5;
+        }
+
+        .admin-header {
+            background: #fe5000;
+            /* 悠饭橙 */
+            color: white;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+
+        .admin-logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .admin-layout {
+            display: flex;
+            height: calc(100vh - 56px);
+        }
+
+        .admin-sidebar {
+            width: 220px;
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-group {
+            padding: 0.5rem 0;
+        }
+
+        .group-title {
+            padding: 0.75rem 1.5rem;
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: #1e293b;
+            text-decoration: none;
+            font-size: 0.875rem;
+            gap: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .menu-item:hover {
+            background: #f8fafc;
+            color: #fe5000;
+        }
+
+        .menu-item.active {
+            background: #fff7ed;
+            color: #fe5000;
+            border-right: 3px solid #fe5000;
+        }
+
+        .menu-item.sub-item {
+            padding-left: 2.75rem;
+            font-size: 0.8rem;
+        }
+
+        .admin-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .data-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .value-cell {
+            font-family: 'Inter', monospace;
+            font-weight: 500;
+        }
+
+        .text-green {
+            color: #10b981;
+        }
+
+        .text-red {
+            color: #ef4444;
+        }
+
+        /* 展开菜单逻辑简化 */
+        .group-header {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 筛选栏样式 */
+        .filter-bar {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-end;
+            /* 让 label 和 input 对齐 */
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-item label {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .form-control {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            color: #1e293b;
+            min-width: 160px;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: #fe5000;
+            box-shadow: 0 0 0 2px rgba(254, 80, 0, 0.1);
+        }
+
+        .btn-search {
+            background: #fe5000;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            font-weight: 500;
+            height: 36px;
+            /* Match input height roughly */
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-search:hover {
+            background: #e04600;
+        }
+
+        /* Tooltip 组件 */
+        .tooltip-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: help;
+        }
+
+        .tooltip-container .tooltip-text {
+            visibility: hidden;
+            width: 50px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 4px 6px;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .tooltip-container .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -4px;
+            border-width: 4px;
+            border-style: solid;
+            border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+        }
+
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="admin-header">
+        <div class="admin-logo"><i class="fa-solid fa-bowl-rice"></i> 悠饭管理后台</div>
+        <div>
+            <span>你好，系统管理员</span>
+            <span style="margin-left: 1rem; opacity: 0.8;"><i class="fa-solid fa-bell"></i> 消息(0)</span>
+            <span style="margin-left: 1rem; cursor: pointer;">退出</span>
+        </div>
+    </header>
+
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <div class="sidebar-group">
+                <a href="#" class="menu-item"><i class="fa-solid fa-chart-line"></i> 运营看板</a>
+                <a href="#" class="menu-item"><i class="fa-solid fa-building"></i> 公司管理</a>
+
+                <!-- 移动餐车模块 -->
+                <div class="menu-item group-header" style="color: #fe5000; background: #fff7ed;">
+                    <span><i class="fa-solid fa-truck-fast"></i> 移动餐车</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <a href="收银app-餐车模式.html" class="menu-item sub-item">餐车概览</a>
+                <a href="验收与剩餐记录.html" class="menu-item sub-item active">验收与剩餐</a>
+                <a href="#" class="menu-item sub-item">销售报表</a>
+
+                <a href="#" class="menu-item"><i class="fa-solid fa-utensils"></i> 移动食堂</a>
+            </div>
+        </aside>
+
+        <main class="admin-content">
+            <div class="page-header">
+                <div class="page-title">验收与剩餐消耗统计</div>
+                <button onclick="clearData()"
+                    style="padding: 0.5rem 1rem; cursor: pointer; border: 1px solid #e2e8f0; background: white; border-radius: 4px; color: #64748b;">
+                    <i class="fa-solid fa-rotate-right"></i> 重置演示数据
+                </button>
+            </div>
+
+            <!-- 筛选栏 -->
+            <div class="filter-bar">
+                <div class="filter-item">
+                    <label>日期</label>
+                    <input type="date" id="filter-date" class="form-control">
+                </div>
+                <div class="filter-item">
+                    <label>客户</label>
+                    <select id="filter-customer" class="form-control">
+                        <option value="">全部客户</option>
+                        <option value="AA公司">AA公司</option>
+                        <option value="BB科技">BB科技</option>
+                        <option value="CC集团">CC集团</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>餐段</label>
+                    <select id="filter-meal" class="form-control">
+                        <option value="">全部餐段</option>
+                        <option value="午餐" selected>午餐</option>
+                        <option value="晚餐">晚餐</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                    <button class="btn-search" onclick="loadAdminData()">
+                        <i class="fa-solid fa-magnifying-glass"></i> 查询
+                    </button>
+                    <button class="btn-search" style="background: #10b981;" onclick="exportData()">
+                        <i class="fa-solid fa-file-export"></i> 导出
+                    </button>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>菜品名称</th>
+                            <th>下单重量 (g)</th>
+                            <th>
+                                <div class="tooltip-container">
+                                    验收重量 (g) <i class="fa-solid fa-circle-info"
+                                        style="color:#94a3b8; margin-left:4px;"></i>
+                                    <span class="tooltip-text">已去皮</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="tooltip-container">
+                                    剩餐重量 (g) <i class="fa-solid fa-circle-info"
+                                        style="color:#94a3b8; margin-left:4px;"></i>
+                                    <span class="tooltip-text">已去皮</span>
+                                </div>
+                            </th>
+                            <th>是否达标</th>
+                            <th>消耗量 (g)</th>
+                            <th>消耗率</th>
+                            <th>验收图片</th>
+                            <th>剩餐图片</th>
+                            <th>验收录入时间</th>
+                            <th>剩餐录入时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="report-list">
+                        <!-- JS填充 -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 读取主应用的数据
+        function loadAdminData() {
+            // 获取筛选条件 (模拟)
+            const date = document.getElementById('filter-date').value;
+            const customer = document.getElementById('filter-customer').value;
+            const meal = document.getElementById('filter-meal').value;
+
+            console.log(`查询条件: 日期=${date}, 客户=${customer}, 餐段=${meal}`);
+            // 注意：由于演示数据的 record 中没有包含客户和餐段字段，
+            // 这里暂不执行实际过滤逻辑，仅展示筛选交互。
+            // 实际开发中应在 createRecord 时写入这些字段，并在下方 filter 中使用。
+
+            const dishes = JSON.parse(localStorage.getItem('food_truck_dishes') || '[]');
+            const records = JSON.parse(localStorage.getItem('food_truck_records') || '[]');
+
+            const tbody = document.getElementById('report-list');
+            if (dishes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem; color: #94a3b8;">暂无数据，请先在前端操作</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = dishes.map(dish => {
+                const acceptRec = records.find(r => r.id === dish.acceptanceRecordId);
+                const leftRec = records.find(r => r.id === dish.leftoverRecordId);
+
+                // 解析验收重量
+                let acceptWeight = 0;
+                if (acceptRec) {
+                    acceptWeight = parseFloat(acceptRec.detail) || 0;
+                }
+
+                // 解析剩餐重量
+                let leftWeight = 0;
+                let isSoldOut = false;
+                if (leftRec) {
+                    if (leftRec.detail === '已售罄') {
+                        isSoldOut = true;
+                        leftWeight = 0;
+                    } else {
+                        leftWeight = parseFloat(leftRec.detail) || 0;
+                    }
+                }
+
+                // 计算消耗
+                let consumed = '-';
+                let rate = '-';
+
+                if (acceptRec) {
+                    // 如果有验收记录，才可以算消耗
+                    if (leftRec) {
+                        // 有剩餐记录（包括售罄，售罄时剩餐为0，消耗=验收重量）
+                        consumed = (acceptWeight - leftWeight).toFixed(0);
+                        const rateVal = acceptWeight > 0 ? ((acceptWeight - leftWeight) / acceptWeight * 100) : 0;
+                        rate = rateVal.toFixed(1) + '%';
+                    } else {
+                        // 还没有剩餐记录，消耗暂无
+                        consumed = '-';
+                        rate = '-';
+                    }
+                }
+
+                // 格式化展示
+                const timeA = acceptRec ? acceptRec.time : '<span style="color:#cbd5e1">-</span>';
+                const weightA = acceptRec ? `<span class="value-cell">${acceptWeight.toFixed(0)}</span>` : '<span style="color:#cbd5e1">-</span>';
+
+                // 验收图片显示
+                const imageA = acceptRec && acceptRec.image
+                    ? `<img src="${acceptRec.image}" class="thumbnail-img" onclick="viewImage('${acceptRec.image}')" style="cursor: pointer; width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0;">`
+                    : '<span style="color:#cbd5e1">-</span>';
+
+                const timeL = leftRec ? leftRec.time : '<span style="color:#cbd5e1">-</span>';
+                const weightL = leftRec ? (isSoldOut ? '<span class="text-green">已售罄</span>' : `<span class="value-cell">${leftWeight.toFixed(0)}</span>`) : '<span style="color:#cbd5e1">-</span>';
+
+                // 剩餐图片显示（售罄时不显示图片）
+                const imageL = leftRec && leftRec.image && !isSoldOut
+                    ? `<img src="${leftRec.image}" class="thumbnail-img" onclick="viewImage('${leftRec.image}')" style="cursor: pointer; width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0;">`
+                    : '<span style="color:#cbd5e1">-</span>';
+
+                // 新增：下单重量
+                const orderWt = dish.orderWeight || 2500; // 模拟或取真实数据
+                const orderWeightStr = `<span class="value-cell">${orderWt}</span>`;
+
+                // 新增：是否达标
+                let isStandardMetStr = '<span style="color:#cbd5e1">-</span>';
+                if (acceptRec) {
+                    if (acceptWeight > orderWt) {
+                        isStandardMetStr = '<span class="text-green">已达标</span>';
+                    } else {
+                        isStandardMetStr = '<span class="text-red">未达标</span>';
+                    }
+                }
+
+                return `
+                    <tr>
+                        <td style="font-weight: 500;">${dish.name}</td>
+                        <td>${orderWeightStr}</td>
+                        <td>${weightA}</td>
+                        <td>${weightL}</td>
+                        <td>${isStandardMetStr}</td>
+                        <td><span class="value-cell">${consumed}</span></td>
+                        <td><span class="value-cell">${rate}</span></td>
+                        <td>${imageA}</td>
+                        <td>${imageL}</td>
+                        <td>${timeA}</td>
+                        <td>${timeL}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 查看大图
+        function viewImage(imgSrc) {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; cursor: pointer;';
+            modal.onclick = () => modal.remove();
+
+            const img = document.createElement('img');
+            img.src = imgSrc;
+            img.style.cssText = 'max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);';
+
+            modal.appendChild(img);
+            document.body.appendChild(modal);
+        }
+
+        function exportData() {
+            // 获取表头
+            const headers = Array.from(document.querySelectorAll('.data-table thead th')).map(th => th.innerText);
+
+            // 获取表格数据
+            const rows = Array.from(document.querySelectorAll('#report-list tr')).map(tr => {
+                return Array.from(tr.querySelectorAll('td')).map(td => {
+                    // 清理 HTML 标签只保留文本 (或者保留特定的格式)
+                    return td.innerText.replace(/\n/g, '').trim();
+                });
+            });
+
+            // 组合 CSV 内容
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(row => row.join(','))
+            ].join('\n');
+
+            // 创建 Blob 对象 (添加 BOM 以支持 Excel 中文显示)
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+
+            // 创建下载链接
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `餐车消耗统计_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function clearData() {
+
+            if (confirm('确定要清空所有演示数据吗？')) {
+                localStorage.removeItem('food_truck_dishes');
+                localStorage.removeItem('food_truck_records');
+                location.reload();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 默认选中今天
+            document.getElementById('filter-date').valueAsDate = new Date();
+            loadAdminData();
+        });
+    </script>
+</body>
+
+</html>
